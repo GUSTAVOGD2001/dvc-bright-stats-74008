@@ -63,9 +63,9 @@ const Index = () => {
     .filter((p) => p.existencia)
     .reduce((sum, p) => sum + p.precio_final, 0);
 
-  // Extract unique categories
+  // Extract unique categories (filter out empty category names)
   const categories = Array.from(
-    new Set(products.map((p) => p.categoria_nombre))
+    new Set(products.map((p) => p.categoria_nombre).filter(name => name && name.trim() !== ''))
   ).map((name, index) => ({ id: String(index), name }));
 
   // Apply filters to products
