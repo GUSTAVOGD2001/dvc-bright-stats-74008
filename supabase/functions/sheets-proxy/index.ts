@@ -47,10 +47,32 @@ serve(async (req) => {
 
     console.log('📊 Google Sheets response status:', response.status);
     const data = await response.json();
-    console.log('✅ Response data received, products count:', data.data?.length || 0);
+    console.log('📦 Full response data:', JSON.stringify(data).substring(0, 200));
+    
+    // Normalize the response structure
+    // If the API returns an array directly, wrap it in the expected format
+    let normalizedData;
+    if (Array.isArray(data)) {
+      normalizedData = {
+        success: true,
+        data: data
+      };
+      console.log('✅ Normalized array response, products count:', data.length);
+    } else if (data.success !== undefined) {
+      // API already returns the expected format
+      normalizedData = data;
+      console.log('✅ Response data received, success:', data.success, 'products count:', data.data?.length || 0);
+    } else {
+      // Unknown format, try to handle gracefully
+      normalizedData = {
+        success: true,
+        data: [data]
+      };
+      console.log('⚠️ Unknown response format, wrapping in array');
+    }
 
     return new Response(
-      JSON.stringify(data),
+      JSON.stringify(normalizedData),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
