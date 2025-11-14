@@ -47,7 +47,7 @@ const Index = () => {
     queryKey: ["categories"],
     queryFn: () => fetchGraphQL<CategoryListResponse>(QUERY_CATEGORIES),
     retry: 3,
-    retryDelay: 1000,
+    retryDelay: 10000,
   });
 
   const handleRefresh = () => {
@@ -79,32 +79,31 @@ const Index = () => {
     .reduce((sum, p) => sum + p.price_range.minimum_price.final_price.value, 0);
 
   const categories = categoriesData?.categoryList || [];
-  
+
   // Apply filters to products
   const filteredProducts = allProducts.filter((p) => {
     // Status filter
     if (selectedStatus === "available" && !p.is_salable) return false;
     if (selectedStatus === "out_of_stock" && p.is_salable) return false;
-    
+
     // Category filter
     if (selectedCategory !== "all") {
       const hasCategory = p.categories.some((cat) => cat.name === selectedCategory);
       if (!hasCategory) return false;
     }
-    
+
     // Search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      if (!p.name.toLowerCase().includes(searchLower) && 
-          !p.sku.toLowerCase().includes(searchLower)) {
+      if (!p.name.toLowerCase().includes(searchLower) && !p.sku.toLowerCase().includes(searchLower)) {
         return false;
       }
     }
-    
+
     // Price range filter
     const finalPrice = p.price_range.minimum_price.final_price.value;
     if (finalPrice < minPrice || finalPrice > maxPrice) return false;
-    
+
     return true;
   });
 
@@ -125,9 +124,7 @@ const Index = () => {
         <div className="text-center space-y-4 max-w-2xl">
           <AlertCircle className="h-16 w-16 text-destructive mx-auto" />
           <h2 className="text-2xl font-bold text-foreground">Error de Conexión</h2>
-          <p className="text-muted-foreground">
-            No se puede conectar al servidor GraphQL en tiendaddvc.mx
-          </p>
+          <p className="text-muted-foreground">No se puede conectar al servidor GraphQL en tiendaddvc.mx</p>
           <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 text-left">
             <p className="font-mono text-sm text-destructive break-all">
               {statsError instanceof Error ? statsError.message : "Error desconocido"}
@@ -178,12 +175,7 @@ const Index = () => {
         {/* KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <KPICard title="Total de Productos" value={totalProducts.toLocaleString()} icon={Package} />
-          <KPICard
-            title="En Existencia"
-            value={inStock.toLocaleString()}
-            icon={ShoppingCart}
-            variant="success"
-          />
+          <KPICard title="En Existencia" value={inStock.toLocaleString()} icon={ShoppingCart} variant="success" />
           <KPICard title="Agotados" value={outOfStock.toLocaleString()} icon={AlertCircle} variant="danger" />
           <KPICard
             title="Valor Potencial"
