@@ -56,8 +56,8 @@ const Index = () => {
   // Calculate KPIs from all products
   const products = allProducts || [];
   const totalProducts = products.length;
-  const inStock = products.filter((p) => p.existencia === "En Existencia").length;
-  const outOfStock = products.filter((p) => p.existencia === "Agotado").length;
+  const totalInStock = products.filter((p) => p.existencia === "En Existencia").length;
+  const totalOutOfStock = products.filter((p) => p.existencia === "Agotado").length;
 
   const catalogValue = products
     .filter((p) => p.existencia === "En Existencia")
@@ -92,6 +92,10 @@ const Index = () => {
 
     return true;
   });
+
+  // Calculate filtered stats for the inventory chart
+  const filteredInStock = filteredProducts.filter((p) => p.existencia === "En Existencia").length;
+  const filteredOutOfStock = filteredProducts.filter((p) => p.existencia === "Agotado").length;
 
   if (statsLoading) {
     return (
@@ -164,8 +168,8 @@ const Index = () => {
         {/* KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <KPICard title="Total de Productos" value={totalProducts.toLocaleString()} icon={Package} />
-          <KPICard title="En Existencia" value={inStock.toLocaleString()} icon={ShoppingCart} variant="success" />
-          <KPICard title="Agotados" value={outOfStock.toLocaleString()} icon={AlertCircle} variant="danger" />
+          <KPICard title="En Existencia" value={totalInStock.toLocaleString()} icon={ShoppingCart} variant="success" />
+          <KPICard title="Agotados" value={totalOutOfStock.toLocaleString()} icon={AlertCircle} variant="danger" />
           <KPICard
             title="Valor Potencial"
             value={`$${(catalogValue / 1000).toFixed(0)}K`}
@@ -176,7 +180,7 @@ const Index = () => {
 
         {/* Charts Row 1 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <InventoryPieChart inStock={inStock} outOfStock={outOfStock} />
+          <InventoryPieChart inStock={filteredInStock} outOfStock={filteredOutOfStock} />
           <CategoryBarChart products={filteredProducts} />
         </div>
 
