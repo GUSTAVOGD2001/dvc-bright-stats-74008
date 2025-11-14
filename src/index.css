@@ -8,71 +8,66 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Neon Dark Theme */
-    --background: 220 15% 7%;
-    --foreground: 0 0% 100%;
+    /* Clean Light Theme */
+    --background: 0 0% 100%;
+    --foreground: 210 11% 15%;
 
-    --card: 220 15% 12%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 11% 15%;
 
-    --popover: 220 15% 10%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 11% 15%;
 
     /* Electric Blue - Primary Interactive */
     --primary: 211 100% 50%;
     --primary-foreground: 0 0% 100%;
 
     /* Neon Magenta */
-    --secondary: 330 100% 45%;
+    --secondary: 340 82% 52%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Dark gray for muted elements */
-    --muted: 220 10% 20%;
-    --muted-foreground: 0 0% 67%;
+    /* Light gray for muted elements */
+    --muted: 210 8% 95%;
+    --muted-foreground: 215 10% 42%;
 
     /* Cyan accent */
-    --accent: 184 100% 50%;
+    --accent: 191 91% 36%;
     --accent-foreground: 0 0% 100%;
 
-    /* Neon Red for negative states */
-    --destructive: 4 100% 60%;
+    /* Red for destructive states */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Neon Green for positive states */
-    --success: 123 100% 54%;
-    --success-foreground: 220 15% 7%;
+    /* Green for success states */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
 
-    /* Yellow for warnings */
-    --warning: 48 100% 52%;
-    --warning-foreground: 220 15% 7%;
+    /* Orange for warnings */
+    --warning: 25 95% 53%;
+    --warning-foreground: 0 0% 100%;
 
-    --border: 220 15% 18%;
-    --input: 220 15% 18%;
+    --border: 214 13% 92%;
+    --input: 214 13% 92%;
     --ring: 211 100% 50%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* Chart colors - Neon palette */
+    /* Chart colors - Bright palette */
     --chart-1: 211 100% 50%; /* Electric Blue */
-    --chart-2: 330 100% 45%; /* Magenta */
-    --chart-3: 48 100% 52%; /* Yellow */
-    --chart-4: 184 100% 50%; /* Cyan */
-    --chart-5: 123 100% 54%; /* Green */
-    --chart-6: 280 100% 55%; /* Purple */
+    --chart-2: 340 82% 52%; /* Magenta */
+    --chart-3: 25 95% 53%; /* Orange */
+    --chart-4: 191 91% 36%; /* Cyan */
+    --chart-5: 142 71% 45%; /* Green */
+    --chart-6: 271 76% 53%; /* Purple */
 
-    --sidebar-background: 220 15% 7%;
-    --sidebar-foreground: 0 0% 100%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 210 11% 15%;
     --sidebar-primary: 211 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 15% 12%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 15% 18%;
+    --sidebar-accent: 210 8% 95%;
+    --sidebar-accent-foreground: 210 11% 15%;
+    --sidebar-border: 214 13% 92%;
     --sidebar-ring: 211 100% 50%;
-
-    /* Glow effects */
-    --glow-primary: 0 0 20px hsl(211 100% 50% / 0.5);
-    --glow-success: 0 0 20px hsl(123 100% 54% / 0.5);
-    --glow-danger: 0 0 20px hsl(4 100% 60% / 0.5);
   }
 }
 

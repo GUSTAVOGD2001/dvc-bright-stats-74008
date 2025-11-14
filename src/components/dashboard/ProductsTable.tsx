@@ -1,10 +1,10 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Product } from "@/services/graphql";
+import { SheetProduct } from "@/services/sheetsApi";
 
 interface ProductsTableProps {
-  products: Product[];
+  products: SheetProduct[];
 }
 
 export function ProductsTable({ products }: ProductsTableProps) {
@@ -16,7 +16,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
   };
 
   return (
-    <Card className="bg-card/50 backdrop-blur-sm border-2 border-primary/20">
+    <Card className="bg-card border-2 border-border shadow-sm">
       <CardHeader>
         <CardTitle className="text-foreground flex items-center gap-2">
           <div className="w-1 h-6 bg-accent rounded-full" />
@@ -41,9 +41,9 @@ export function ProductsTable({ products }: ProductsTableProps) {
               {products.slice(0, 20).map((product) => (
                 <TableRow key={product.sku} className="hover:bg-muted/30 transition-colors">
                   <TableCell className="font-mono text-xs text-muted-foreground">{product.sku}</TableCell>
-                  <TableCell className="font-medium text-foreground max-w-xs truncate">{product.name}</TableCell>
+                  <TableCell className="font-medium text-foreground max-w-xs truncate">{product.nombre}</TableCell>
                   <TableCell>
-                    {product.is_salable ? (
+                    {product.existencia ? (
                       <Badge variant="outline" className="bg-success/10 text-success border-success/30">
                         En Existencia
                       </Badge>
@@ -54,16 +54,16 @@ export function ProductsTable({ products }: ProductsTableProps) {
                     )}
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">
-                    {formatPrice(product.price_range.minimum_price.regular_price.value)}
+                    {formatPrice(product.precio_regular)}
                   </TableCell>
                   <TableCell className="text-right text-foreground font-semibold">
-                    {formatPrice(product.price_range.minimum_price.final_price.value)}
+                    {formatPrice(product.precio_final)}
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">
-                    {product.weight?.toFixed(2) || "N/A"}
+                    {product.peso?.toFixed(2) || "N/A"}
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground max-w-xs truncate">
-                    {product.categories.map((cat) => cat.name).join(", ")}
+                    {product.categoria_nombre}
                   </TableCell>
                 </TableRow>
               ))}

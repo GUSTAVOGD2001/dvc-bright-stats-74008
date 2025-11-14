@@ -1,9 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Product } from "@/services/graphql";
+import { SheetProduct } from "@/services/sheetsApi";
 
 interface PriceHistogramProps {
-  products: Product[];
+  products: SheetProduct[];
 }
 
 export function PriceHistogram({ products }: PriceHistogramProps) {
@@ -19,7 +19,7 @@ export function PriceHistogram({ products }: PriceHistogramProps) {
 
   const data = ranges.map((range) => {
     const count = products.filter((product) => {
-      const price = product.price_range.minimum_price.final_price.value;
+      const price = product.precio_final;
       return price >= range.min && price < range.max;
     }).length;
 
@@ -27,7 +27,7 @@ export function PriceHistogram({ products }: PriceHistogramProps) {
   });
 
   return (
-    <Card className="bg-card/50 backdrop-blur-sm border-2 border-primary/20">
+    <Card className="bg-card border-2 border-border shadow-sm">
       <CardHeader>
         <CardTitle className="text-foreground flex items-center gap-2">
           <div className="w-1 h-6 bg-warning rounded-full" />

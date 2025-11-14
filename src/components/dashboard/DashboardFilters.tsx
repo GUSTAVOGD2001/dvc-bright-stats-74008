@@ -36,7 +36,7 @@ export function DashboardFilters({
   isRefreshing,
 }: DashboardFiltersProps) {
   return (
-    <div className="space-y-4 bg-card/30 backdrop-blur-sm p-4 rounded-lg border border-border">
+    <div className="space-y-4 bg-card p-4 rounded-lg border border-border shadow-sm">
       <div className="flex items-center gap-2 mb-4">
         <Filter className="h-5 w-5 text-primary" />
         <span className="text-sm font-medium text-foreground">Filtros</span>
@@ -53,7 +53,7 @@ export function DashboardFilters({
             placeholder="Buscar productos..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 bg-background border-primary/30"
+            className="pl-10 bg-background border-border"
           />
         </div>
       </div>
@@ -63,7 +63,7 @@ export function DashboardFilters({
         <div className="space-y-2">
           <Label className="text-foreground">Categoría</Label>
           <Select value={selectedCategory} onValueChange={onCategoryChange}>
-            <SelectTrigger className="bg-background border-primary/30">
+            <SelectTrigger className="bg-background border-border">
               <SelectValue placeholder="Todas las categorías" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
@@ -81,7 +81,7 @@ export function DashboardFilters({
         <div className="space-y-2">
           <Label className="text-foreground">Estado</Label>
           <Select value={selectedStatus} onValueChange={onStatusChange}>
-            <SelectTrigger className="bg-background border-primary/30">
+            <SelectTrigger className="bg-background border-border">
               <SelectValue placeholder="Estado de existencia" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
@@ -101,7 +101,7 @@ export function DashboardFilters({
             min="0"
             value={minPrice}
             onChange={(e) => onMinPriceChange(Number(e.target.value))}
-            className="bg-background border-primary/30"
+            className="bg-background border-border"
           />
         </div>
 
@@ -114,21 +114,20 @@ export function DashboardFilters({
             min="0"
             value={maxPrice}
             onChange={(e) => onMaxPriceChange(Number(e.target.value))}
-            className="bg-background border-primary/30"
+            className="bg-background border-border"
           />
         </div>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end pt-2">
         <Button
           onClick={onRefresh}
           disabled={isRefreshing}
           variant="outline"
-          size="sm"
-          className="border-primary/30 hover:bg-primary/10"
+          className="flex items-center gap-2 border-primary/30 hover:bg-primary/10"
         >
-          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
-          Actualizar
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+          {isRefreshing ? "Actualizando..." : "Actualizar Dashboard"}
         </Button>
       </div>
     </div>

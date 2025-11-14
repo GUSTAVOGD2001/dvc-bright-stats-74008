@@ -7,18 +7,11 @@ import { InventoryPieChart } from "@/components/dashboard/InventoryPieChart";
 import { CategoryBarChart } from "@/components/dashboard/CategoryBarChart";
 import { PriceHistogram } from "@/components/dashboard/PriceHistogram";
 import { ProductsTable } from "@/components/dashboard/ProductsTable";
-import {
-  fetchGraphQL,
-  fetchAllProducts,
-  QUERY_GLOBAL_STATS,
-  QUERY_CATEGORIES,
-  QUERY_DASHBOARD_PRODUCTS,
-  ProductsResponse,
-  CategoryListResponse,
-} from "@/services/graphql";
+import { ControlButtons } from "@/components/dashboard/ControlButtons";
+import { fetchAllProducts, SheetProduct } from "@/services/sheetsApi";
 import { toast } from "sonner";
 
-const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const AUTO_REFRESH_INTERVAL = 30 * 60 * 1000; // 30 minutes
 
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -27,27 +20,19 @@ const Index = () => {
   const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(100000);
 
-  // Query for global stats (fetch all products in one go using batch strategy)
+  // Query for all products from Google Sheets
   const {
-    data: allProductsData,
+    data: allProducts,
     refetch: refetchStats,
     isLoading: statsLoading,
     error: statsError,
   } = useQuery({
-    queryKey: ["allProducts"],
-    queryFn: () => fetchAllProducts(),
+    queryKey: ["sheetsProducts"],
+    queryFn: fetchAllProducts,
     refetchInterval: AUTO_REFRESH_INTERVAL,
     retry: 3,
     retryDelay: 1000,
-    staleTime: 4 * 60 * 1000, // Consider data fresh for 4 minutes
-  });
-
-  // Query for categories (still needed for filters)
-  const { data: categoriesData, error: categoriesError } = useQuery({
-    queryKey: ["categories"],
-    queryFn: () => fetchGraphQL<CategoryListResponse>(QUERY_CATEGORIES),
-    retry: 3,
-    retryDelay: 10000,
+    staleTime: 25 * 60 * 1000, // Consider data fresh for 25 minutes
   });
 
   const handleRefresh = () => {
@@ -69,40 +54,39 @@ const Index = () => {
   }, []);
 
   // Calculate KPIs from all products
-  const allProducts = allProductsData?.products.items || [];
-  const totalProducts = allProducts.length;
-  const inStock = allProducts.filter((p) => p.is_salable).length;
-  const outOfStock = allProducts.filter((p) => !p.is_salable).length;
+  const products = allProducts || [];
+  const totalProducts = products.length;
+  const inStock = products.filter((p) => p.existencia).length;
+  const outOfStock = products.filter((p) => !p.existencia).length;
 
-  const catalogValue = allProducts
-    .filter((p) => p.is_salable)
-    .reduce((sum, p) => sum + p.price_range.minimum_price.final_price.value, 0);
+  const catalogValue = products
+    .filter((p) => p.existencia)
+    .reduce((sum, p) => sum + p.precio_final, 0);
 
-  const categories = categoriesData?.categoryList || [];
+  // Extract unique categories
+  const categories = Array.from(
+    new Set(products.map((p) => p.categoria_nombre))
+  ).map((name, index) => ({ id: String(index), name }));
 
   // Apply filters to products
-  const filteredProducts = allProducts.filter((p) => {
+  const filteredProducts = products.filter((p) => {
     // Status filter
-    if (selectedStatus === "available" && !p.is_salable) return false;
-    if (selectedStatus === "out_of_stock" && p.is_salable) return false;
+    if (selectedStatus === "available" && !p.existencia) return false;
+    if (selectedStatus === "out_of_stock" && p.existencia) return false;
 
     // Category filter
-    if (selectedCategory !== "all") {
-      const hasCategory = p.categories.some((cat) => cat.name === selectedCategory);
-      if (!hasCategory) return false;
-    }
+    if (selectedCategory !== "all" && p.categoria_nombre !== selectedCategory) return false;
 
     // Search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      if (!p.name.toLowerCase().includes(searchLower) && !p.sku.toLowerCase().includes(searchLower)) {
+      if (!p.nombre.toLowerCase().includes(searchLower) && !p.sku.toLowerCase().includes(searchLower)) {
         return false;
       }
     }
 
     // Price range filter
-    const finalPrice = p.price_range.minimum_price.final_price.value;
-    if (finalPrice < minPrice || finalPrice > maxPrice) return false;
+    if (p.precio_final < minPrice || p.precio_final > maxPrice) return false;
 
     return true;
   });
@@ -124,7 +108,7 @@ const Index = () => {
         <div className="text-center space-y-4 max-w-2xl">
           <AlertCircle className="h-16 w-16 text-destructive mx-auto" />
           <h2 className="text-2xl font-bold text-foreground">Error de Conexión</h2>
-          <p className="text-muted-foreground">No se puede conectar al servidor GraphQL en tiendaddvc.mx</p>
+          <p className="text-muted-foreground">No se puede conectar a la API de Google Sheets</p>
           <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 text-left">
             <p className="font-mono text-sm text-destructive break-all">
               {statsError instanceof Error ? statsError.message : "Error desconocido"}
@@ -149,11 +133,14 @@ const Index = () => {
       <div className="max-w-[1600px] mx-auto space-y-6">
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-5xl font-bold text-foreground tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-accent animate-pulse">
+          <h1 className="text-5xl font-bold text-foreground tracking-tight">
             Dashboard Villa de Cortes
           </h1>
           <p className="text-muted-foreground text-lg">Business Intelligence en Tiempo Real</p>
         </div>
+
+        {/* Control Buttons */}
+        <ControlButtons />
 
         {/* Filters */}
         <DashboardFilters

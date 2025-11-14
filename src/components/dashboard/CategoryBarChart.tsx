@@ -1,17 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Product } from "@/services/graphql";
+import { SheetProduct } from "@/services/sheetsApi";
 
 interface CategoryBarChartProps {
-  products: Product[];
+  products: SheetProduct[];
 }
 
 export function CategoryBarChart({ products }: CategoryBarChartProps) {
   // Process products to get top 15 categories
   const categoryCounts = products.reduce((acc, product) => {
-    product.categories.forEach((cat) => {
-      acc[cat.name] = (acc[cat.name] || 0) + 1;
-    });
+    const catName = product.categoria_nombre;
+    acc[catName] = (acc[catName] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
@@ -21,7 +20,7 @@ export function CategoryBarChart({ products }: CategoryBarChartProps) {
     .slice(0, 15);
 
   return (
-    <Card className="bg-card/50 backdrop-blur-sm border-2 border-primary/20">
+    <Card className="bg-card border-2 border-border shadow-sm">
       <CardHeader>
         <CardTitle className="text-foreground flex items-center gap-2">
           <div className="w-1 h-6 bg-secondary rounded-full" />
