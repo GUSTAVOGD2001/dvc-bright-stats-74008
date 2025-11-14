@@ -63,10 +63,19 @@ export async function fetchGraphQL<T>(query: string, variables: Record<string, a
 }
 
 export const QUERY_GLOBAL_STATS = `
-  query DashboardGlobalStats {
-    total_productos: products(filter: {}) { total_count }
-    en_existencia: products(filter: { is_salable: { eq: true } }) { total_count }
-    agotados: products(filter: { is_salable: { eq: false } }) { total_count }
+  query DashboardGlobalStats($pageSize: Int!, $currentPage: Int!) {
+    products(filter: {}, pageSize: $pageSize, currentPage: $currentPage) {
+      total_count
+      items {
+        sku
+        is_salable
+        price_range {
+          minimum_price {
+            final_price { value }
+          }
+        }
+      }
+    }
   }
 `;
 
@@ -82,36 +91,35 @@ export const QUERY_CATEGORIES = `
 `;
 
 export const QUERY_DASHBOARD_PRODUCTS = `
-  query GetDashboardProducts(
-    $pageSize: Int!,
-    $currentPage: Int!,
-    $catId: String,
-    $isSalable: Boolean
-  ) {
-    products(
-      filter: {
-        category_id: { eq: $catId }
-        is_salable: { eq: $isSalable }
-      }
-      pageSize: $pageSize
-      currentPage: $currentPage
-    ) {
+  query GetDashboardProducts($pageSize: Int!, $currentPage: Int!) {
+    products(filter: {}, pageSize: $pageSize, currentPage: $currentPage) {
       total_count
+      page_info {
+        current_page
+        total_pages
+      }
       items {
         sku
         name
         is_salable
+        url_key
+        url_suffix
+        small_image { url }
+        image { url }
         price_range {
           minimum_price {
-            regular_price { value }
-            final_price { value }
+            regular_price { value currency }
+            final_price { value currency }
           }
+        }
+        categories {
+          name
+          url_path
+          level
         }
         ... on PhysicalProductInterface {
           weight
-          manufacturer
         }
-        categories { name }
       }
     }
   }

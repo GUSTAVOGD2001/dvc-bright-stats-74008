@@ -31,7 +31,7 @@ const Index = () => {
     error: statsError,
   } = useQuery({
     queryKey: ["globalStats"],
-    queryFn: () => fetchGraphQL<any>(QUERY_GLOBAL_STATS),
+    queryFn: () => fetchGraphQL<ProductsResponse>(QUERY_GLOBAL_STATS, { pageSize: 1000, currentPage: 1 }),
     refetchInterval: AUTO_REFRESH_INTERVAL,
     retry: 3,
     retryDelay: 1000,
@@ -54,22 +54,10 @@ const Index = () => {
   } = useQuery({
     queryKey: ["products", selectedCategory, selectedStatus],
     queryFn: () => {
-      const variables: any = {
-        pageSize: 100,
+      return fetchGraphQL<ProductsResponse>(QUERY_DASHBOARD_PRODUCTS, {
+        pageSize: 1000,
         currentPage: 1,
-      };
-
-      if (selectedCategory !== "all") {
-        variables.catId = selectedCategory;
-      }
-
-      if (selectedStatus === "available") {
-        variables.isSalable = true;
-      } else if (selectedStatus === "out_of_stock") {
-        variables.isSalable = false;
-      }
-
-      return fetchGraphQL<ProductsResponse>(QUERY_DASHBOARD_PRODUCTS, variables);
+      });
     },
     refetchInterval: AUTO_REFRESH_INTERVAL,
     retry: 3,
@@ -96,17 +84,28 @@ const Index = () => {
   }, []);
 
   // Calculate KPIs
-  const totalProducts = statsData?.total_productos?.total_count || 0;
-  const inStock = statsData?.en_existencia?.total_count || 0;
-  const outOfStock = statsData?.agotados?.total_count || 0;
+  const allProducts = statsData?.products.items || [];
+  const totalProducts = allProducts.length;
+  const inStock = allProducts.filter((p) => p.is_salable).length;
+  const outOfStock = allProducts.filter((p) => !p.is_salable).length;
 
-  const catalogValue =
-    productsData?.products.items
-      .filter((p) => p.is_salable)
-      .reduce((sum, p) => sum + p.price_range.minimum_price.final_price.value, 0) || 0;
+  const catalogValue = allProducts
+    .filter((p) => p.is_salable)
+    .reduce((sum, p) => sum + p.price_range.minimum_price.final_price.value, 0);
 
   const categories = categoriesData?.categoryList || [];
   const products = productsData?.products.items || [];
+  
+  // Apply filters to products
+  const filteredProducts = products.filter((p) => {
+    if (selectedStatus === "available" && !p.is_salable) return false;
+    if (selectedStatus === "out_of_stock" && p.is_salable) return false;
+    if (selectedCategory !== "all") {
+      const hasCategory = p.categories.some((cat) => cat.name === selectedCategory);
+      if (!hasCategory) return false;
+    }
+    return true;
+  });
 
   if (statsLoading) {
     return (
@@ -190,16 +189,16 @@ const Index = () => {
         {/* Charts Row 1 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <InventoryPieChart inStock={inStock} outOfStock={outOfStock} />
-          <CategoryBarChart products={products} />
+          <CategoryBarChart products={filteredProducts} />
         </div>
 
         {/* Charts Row 2 */}
         <div className="grid grid-cols-1 gap-6">
-          <PriceHistogram products={products} />
+          <PriceHistogram products={filteredProducts} />
         </div>
 
         {/* Products Table */}
-        <ProductsTable products={products} />
+        <ProductsTable products={filteredProducts} />
       </div>
     </div>
   );
