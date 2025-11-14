@@ -2,7 +2,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Filter, RefreshCw, Search, ChevronsUpDown, Check } from "lucide-react";
+import { Filter, RefreshCw, Search, ChevronsUpDown, Check, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
@@ -26,6 +26,7 @@ interface DashboardFiltersProps {
   onMinPriceChange: (value: number) => void;
   onMaxPriceChange: (value: number) => void;
   onRefresh: () => void;
+  onClearFilters: () => void;
   isRefreshing: boolean;
 }
 
@@ -42,6 +43,7 @@ export function DashboardFilters({
   onMinPriceChange,
   onMaxPriceChange,
   onRefresh,
+  onClearFilters,
   isRefreshing,
 }: DashboardFiltersProps) {
   const [openCategoryPicker, setOpenCategoryPicker] = useState(false);
@@ -77,9 +79,32 @@ export function DashboardFilters({
 
   return (
     <div className="space-y-4 bg-card p-4 rounded-lg border border-border shadow-sm">
-      <div className="flex items-center gap-2 mb-4">
-        <Filter className="h-5 w-5 text-primary" />
-        <span className="text-sm font-medium text-foreground">Filtros</span>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Filter className="h-5 w-5 text-primary" />
+          <span className="text-sm font-medium text-foreground">Filtros</span>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            onClick={onClearFilters}
+            variant="outline"
+            size="sm"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4 mr-1" />
+            Limpiar
+          </Button>
+          <Button
+            onClick={onRefresh}
+            variant="outline"
+            size="sm"
+            disabled={isRefreshing}
+            className="text-primary hover:text-primary"
+          >
+            <RefreshCw className={`h-4 w-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Actualizar
+          </Button>
+        </div>
       </div>
 
       {/* Search by name */}
@@ -189,18 +214,6 @@ export function DashboardFilters({
             className="bg-background border-border"
           />
         </div>
-      </div>
-
-      <div className="flex justify-end pt-2">
-        <Button
-          onClick={onRefresh}
-          disabled={isRefreshing}
-          variant="outline"
-          className="flex items-center gap-2 border-primary/30 hover:bg-primary/10"
-        >
-          <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-          {isRefreshing ? "Actualizando..." : "Actualizar Dashboard"}
-        </Button>
       </div>
     </div>
   );
