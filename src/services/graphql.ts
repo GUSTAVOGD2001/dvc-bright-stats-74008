@@ -1,4 +1,4 @@
-const GRAPHQL_ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/graphql-proxy`;
+import { supabase } from "@/integrations/supabase/client";
 
 export interface Product {
   sku: string;
@@ -33,24 +33,16 @@ export interface CategoryListResponse {
 
 export async function fetchGraphQL<T>(query: string, variables: Record<string, any> = {}): Promise<T> {
   try {
-    const response = await fetch(GRAPHQL_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "apikey": import.meta.env.VITE_SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({ query, variables }),
+    const { data, error } = await supabase.functions.invoke('graphql-proxy', {
+      body: { query, variables }
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("GraphQL HTTP Error:", response.status, errorText);
-      throw new Error(`GraphQL HTTP ${response.status}: ${errorText || response.statusText}`);
+    if (error) {
+      console.error("GraphQL Proxy Error:", error);
+      throw new Error(error.message || "Error calling GraphQL proxy");
     }
 
-    const result = await response.json();
-    return result;
+    return data;
   } catch (error) {
     console.error("GraphQL Fetch Error:", error);
     throw error;
