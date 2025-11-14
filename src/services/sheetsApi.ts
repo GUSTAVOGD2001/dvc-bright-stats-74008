@@ -1,4 +1,4 @@
-const SHEETS_API_URL = "https://script.google.com/macros/s/AKfycbzD6oI3cVGyF1yAMNRaxjljYtqZ5AxSF_VI0xZbpPPaL-KZoEHtNiZ33OBVfyBduKZi/exec";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface SheetProduct {
   sku: string;
@@ -18,25 +18,20 @@ export interface SheetsResponse {
 
 export async function fetchAllProducts(): Promise<SheetProduct[]> {
   try {
-    const response = await fetch(SHEETS_API_URL, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+    const { data, error } = await supabase.functions.invoke('sheets-proxy', {
+      body: { method: 'GET' }
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (error) {
+      console.error('Sheets Proxy Error:', error);
+      throw new Error(error.message || 'Error al conectar con Google Sheets');
     }
 
-    const result: SheetsResponse = await response.json();
-    
-    if (!result.success) {
-      throw new Error(result.message || 'Error fetching products');
+    if (!data.success) {
+      throw new Error(data.message || 'Error fetching products');
     }
 
-    return result.data;
+    return data.data;
   } catch (error) {
     console.error('Sheets API Error:', error);
     throw error;
@@ -45,19 +40,19 @@ export async function fetchAllProducts(): Promise<SheetProduct[]> {
 
 export async function triggerManualUpdate(): Promise<{ message: string }> {
   try {
-    const response = await fetch(SHEETS_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ action: 'run_manual_update' }),
+    const { data, error } = await supabase.functions.invoke('sheets-proxy', {
+      body: { 
+        method: 'POST',
+        action: 'run_manual_update' 
+      }
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (error) {
+      console.error('Manual Update Error:', error);
+      throw new Error(error.message || 'Error al iniciar actualización manual');
     }
 
-    return await response.json();
+    return data;
   } catch (error) {
     console.error('Manual Update Error:', error);
     throw error;
@@ -66,19 +61,19 @@ export async function triggerManualUpdate(): Promise<{ message: string }> {
 
 export async function enableAutoUpdate(): Promise<{ message: string }> {
   try {
-    const response = await fetch(SHEETS_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ action: 'enable_auto_update' }),
+    const { data, error } = await supabase.functions.invoke('sheets-proxy', {
+      body: { 
+        method: 'POST',
+        action: 'enable_auto_update' 
+      }
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (error) {
+      console.error('Enable Auto Update Error:', error);
+      throw new Error(error.message || 'Error al activar actualización automática');
     }
 
-    return await response.json();
+    return data;
   } catch (error) {
     console.error('Enable Auto Update Error:', error);
     throw error;
@@ -87,19 +82,19 @@ export async function enableAutoUpdate(): Promise<{ message: string }> {
 
 export async function disableAutoUpdate(): Promise<{ message: string }> {
   try {
-    const response = await fetch(SHEETS_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ action: 'disable_auto_update' }),
+    const { data, error } = await supabase.functions.invoke('sheets-proxy', {
+      body: { 
+        method: 'POST',
+        action: 'disable_auto_update' 
+      }
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (error) {
+      console.error('Disable Auto Update Error:', error);
+      throw new Error(error.message || 'Error al desactivar actualización automática');
     }
 
-    return await response.json();
+    return data;
   } catch (error) {
     console.error('Disable Auto Update Error:', error);
     throw error;
