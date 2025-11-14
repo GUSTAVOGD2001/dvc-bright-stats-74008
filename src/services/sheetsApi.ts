@@ -103,3 +103,31 @@ export async function disableAutoUpdate(): Promise<{ message: string }> {
     throw error;
   }
 }
+
+export interface UpdateStatus {
+  status: 'idle' | 'running';
+  progress: number;
+  message: string;
+  report?: string;
+}
+
+export async function getUpdateStatus(): Promise<UpdateStatus> {
+  try {
+    const { data, error } = await supabase.functions.invoke('sheets-proxy', {
+      body: { 
+        method: 'POST',
+        action: 'get_update_status' 
+      }
+    });
+
+    if (error) {
+      console.error('Get Update Status Error:', error);
+      throw new Error(error.message || 'Error al obtener estado de actualización');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Get Update Status Error:', error);
+    throw error;
+  }
+}
