@@ -2,7 +2,11 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Filter, RefreshCw, Search } from "lucide-react";
+import { Filter, RefreshCw, Search, ChevronsUpDown, Check } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 interface CategoryStructure {
   mainCategory: string;
@@ -40,11 +44,36 @@ export function DashboardFilters({
   onRefresh,
   isRefreshing,
 }: DashboardFiltersProps) {
+  const [openCategoryPicker, setOpenCategoryPicker] = useState(false);
+  
   // Format category path for display
   const formatCategoryPath = (path: string) => {
     const parts = path.split('/');
-    return parts[parts.length - 1].charAt(0).toUpperCase() + parts[parts.length - 1].slice(1);
+    return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' > ');
   };
+
+  // Get display value for selected category
+  const getSelectedCategoryDisplay = () => {
+    if (selectedCategory === "all") return "Todas las categorías";
+    return formatCategoryPath(selectedCategory);
+  };
+
+  // Build flat list of all categories for search
+  const allCategories = [
+    { value: "all", label: "Todas las categorías", isMain: false },
+    ...categoryStructure.flatMap(catStruct => [
+      { 
+        value: catStruct.mainCategory, 
+        label: `${catStruct.mainCategory.charAt(0).toUpperCase() + catStruct.mainCategory.slice(1)} (todas)`,
+        isMain: true
+      },
+      ...catStruct.subcategories.map(subPath => ({
+        value: subPath,
+        label: formatCategoryPath(subPath),
+        isMain: false
+      }))
+    ])
+  ];
 
   return (
     <div className="space-y-4 bg-card p-4 rounded-lg border border-border shadow-sm">
@@ -70,32 +99,54 @@ export function DashboardFilters({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Category filter with hierarchy */}
+        {/* Category filter with search */}
         <div className="space-y-2">
           <Label className="text-foreground">Categoría</Label>
-          <Select value={selectedCategory} onValueChange={onCategoryChange}>
-            <SelectTrigger className="bg-background border-border">
-              <SelectValue placeholder="Todas las categorías" />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border-border max-h-[400px]">
-              <SelectItem value="all">Todas las categorías</SelectItem>
-              {categoryStructure.map((catStruct) => (
-                <SelectGroup key={catStruct.mainCategory}>
-                  <SelectLabel className="capitalize font-semibold text-primary">
-                    {catStruct.mainCategory}
-                  </SelectLabel>
-                  <SelectItem value={catStruct.mainCategory}>
-                    Todas en {catStruct.mainCategory}
-                  </SelectItem>
-                  {catStruct.subcategories.map((subPath) => (
-                    <SelectItem key={subPath} value={subPath} className="pl-6">
-                      {formatCategoryPath(subPath)}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              ))}
-            </SelectContent>
-          </Select>
+          <Popover open={openCategoryPicker} onOpenChange={setOpenCategoryPicker}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={openCategoryPicker}
+                className="w-full justify-between bg-background border-border text-left font-normal"
+              >
+                <span className="truncate">{getSelectedCategoryDisplay()}</span>
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[300px] p-0 bg-popover border-border" align="start">
+              <Command className="bg-popover">
+                <CommandInput placeholder="Buscar categoría..." className="border-none" />
+                <CommandList>
+                  <CommandEmpty>No se encontraron categorías.</CommandEmpty>
+                  <CommandGroup>
+                    {allCategories.map((category) => (
+                      <CommandItem
+                        key={category.value}
+                        value={category.label}
+                        onSelect={() => {
+                          onCategoryChange(category.value);
+                          setOpenCategoryPicker(false);
+                        }}
+                        className={cn(
+                          "cursor-pointer",
+                          !category.isMain && category.value !== "all" && "pl-6"
+                        )}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedCategory === category.value ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {category.label}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Status filter */}
