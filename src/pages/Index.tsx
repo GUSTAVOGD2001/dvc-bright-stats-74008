@@ -117,7 +117,7 @@ const Index = () => {
           <div className="text-sm text-muted-foreground space-y-2">
             <p>Posibles causas:</p>
             <ul className="list-disc list-inside text-left space-y-1">
-              <li>El servidor GraphQL no está respondiendo</li>
+              <li>La API de Google Sheets no está respondiendo</li>
               <li>Problemas de CORS en el servidor</li>
               <li>La URL del endpoint es incorrecta</li>
               <li>Problemas de conectividad de red</li>
