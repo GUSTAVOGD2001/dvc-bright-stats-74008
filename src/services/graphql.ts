@@ -1,4 +1,4 @@
-const GRAPHQL_ENDPOINT = "https://tiendaddvc.mx/graphql";
+const GRAPHQL_ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/graphql-proxy`;
 
 export interface Product {
   sku: string;
@@ -38,6 +38,7 @@ export async function fetchGraphQL<T>(query: string, variables: Record<string, a
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
+        "apikey": import.meta.env.VITE_SUPABASE_ANON_KEY,
       },
       body: JSON.stringify({ query, variables }),
     });
@@ -49,13 +50,7 @@ export async function fetchGraphQL<T>(query: string, variables: Record<string, a
     }
 
     const result = await response.json();
-    
-    if (result.errors) {
-      console.error("GraphQL Errors:", result.errors);
-      throw new Error(result.errors[0]?.message || "GraphQL query error");
-    }
-
-    return result.data;
+    return result;
   } catch (error) {
     console.error("GraphQL Fetch Error:", error);
     throw error;
