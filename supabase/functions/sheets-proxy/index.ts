@@ -8,17 +8,24 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log('📥 Sheets Proxy - Request received:', req.method);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('✅ CORS preflight handled');
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const { method, action } = await req.json();
+    const body = await req.json();
+    console.log('📦 Request body:', JSON.stringify(body));
+    
+    const { method, action } = body;
 
     let response;
 
     if (method === 'GET' || !action) {
+      console.log('🔍 GET request - Fetching all products from Google Sheets');
       // GET request to fetch all products
       response = await fetch(SHEETS_API_URL, {
         method: 'GET',
@@ -27,6 +34,7 @@ serve(async (req) => {
         },
       });
     } else {
+      console.log('📤 POST request - Action:', action);
       // POST request with action
       response = await fetch(SHEETS_API_URL, {
         method: 'POST',
@@ -37,7 +45,9 @@ serve(async (req) => {
       });
     }
 
+    console.log('📊 Google Sheets response status:', response.status);
     const data = await response.json();
+    console.log('✅ Response data received, products count:', data.data?.length || 0);
 
     return new Response(
       JSON.stringify(data),
@@ -47,7 +57,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Sheets Proxy Error:', error);
+    console.error('❌ Sheets Proxy Error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
     return new Response(
       JSON.stringify({ 
