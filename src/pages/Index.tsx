@@ -80,7 +80,9 @@ const Index = () => {
     // Search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      if (!p.nombre.toLowerCase().includes(searchLower) && !p.sku.toLowerCase().includes(searchLower)) {
+      const nombre = p.nombre?.toString() || '';
+      const sku = p.sku?.toString() || '';
+      if (!nombre.toLowerCase().includes(searchLower) && !sku.toLowerCase().includes(searchLower)) {
         return false;
       }
     }
