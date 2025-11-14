@@ -8,15 +8,15 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Clean Light Theme */
-    --background: 0 0% 100%;
-    --foreground: 210 11% 15%;
+    /* Dark Theme - Black Background */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 210 11% 15%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 11% 15%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 98%;
 
     /* Electric Blue - Primary Interactive */
     --primary: 211 100% 50%;
@@ -26,9 +26,9 @@ All colors MUST be HSL.
     --secondary: 340 82% 52%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Light gray for muted elements */
-    --muted: 210 8% 95%;
-    --muted-foreground: 215 10% 42%;
+    /* Dark gray for muted elements */
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
 
     /* Cyan accent */
     --accent: 191 91% 36%;
@@ -46,8 +46,8 @@ All colors MUST be HSL.
     --warning: 25 95% 53%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 214 13% 92%;
-    --input: 214 13% 92%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
     --ring: 211 100% 50%;
 
     --radius: 0.5rem;
@@ -60,13 +60,13 @@ All colors MUST be HSL.
     --chart-5: 142 71% 45%; /* Green */
     --chart-6: 271 76% 53%; /* Purple */
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 210 11% 15%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 211 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 8% 95%;
-    --sidebar-accent-foreground: 210 11% 15%;
-    --sidebar-border: 214 13% 92%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 20%;
     --sidebar-ring: 211 100% 50%;
   }
 }
