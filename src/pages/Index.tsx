@@ -42,6 +42,17 @@ const Index = () => {
     });
   };
 
+  const handleClearFilters = () => {
+    setSelectedCategory("all");
+    setSelectedStatus("all");
+    setSearchTerm("");
+    setMinPrice(0);
+    setMaxPrice(100000);
+    toast.info("Filtros limpiados", {
+      description: "Se han restablecido todos los filtros.",
+    });
+  };
+
   useEffect(() => {
     // Show toast when auto-refresh happens
     const interval = setInterval(() => {
@@ -200,6 +211,7 @@ const Index = () => {
           onMinPriceChange={setMinPrice}
           onMaxPriceChange={setMaxPrice}
           onRefresh={handleRefresh}
+          onClearFilters={handleClearFilters}
           isRefreshing={statsLoading}
         />
 
