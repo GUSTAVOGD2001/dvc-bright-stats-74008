@@ -32,26 +32,34 @@ export interface CategoryListResponse {
 }
 
 export async function fetchGraphQL<T>(query: string, variables: Record<string, any> = {}): Promise<T> {
-  const response = await fetch(GRAPHQL_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "User-Agent": "LovableDashboard/1.0",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ query, variables }),
-  });
+  try {
+    const response = await fetch(GRAPHQL_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify({ query, variables }),
+    });
 
-  if (!response.ok) {
-    throw new Error(`GraphQL request failed: ${response.statusText}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("GraphQL HTTP Error:", response.status, errorText);
+      throw new Error(`GraphQL HTTP ${response.status}: ${errorText || response.statusText}`);
+    }
+
+    const result = await response.json();
+    
+    if (result.errors) {
+      console.error("GraphQL Errors:", result.errors);
+      throw new Error(result.errors[0]?.message || "GraphQL query error");
+    }
+
+    return result.data;
+  } catch (error) {
+    console.error("GraphQL Fetch Error:", error);
+    throw error;
   }
-
-  const result = await response.json();
-  
-  if (result.errors) {
-    throw new Error(result.errors[0]?.message || "GraphQL query error");
-  }
-
-  return result.data;
 }
 
 export const QUERY_GLOBAL_STATS = `

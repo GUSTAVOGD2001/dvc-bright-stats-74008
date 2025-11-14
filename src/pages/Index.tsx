@@ -28,16 +28,21 @@ const Index = () => {
     data: statsData,
     refetch: refetchStats,
     isLoading: statsLoading,
+    error: statsError,
   } = useQuery({
     queryKey: ["globalStats"],
     queryFn: () => fetchGraphQL<any>(QUERY_GLOBAL_STATS),
     refetchInterval: AUTO_REFRESH_INTERVAL,
+    retry: 3,
+    retryDelay: 1000,
   });
 
   // Query for categories
-  const { data: categoriesData } = useQuery({
+  const { data: categoriesData, error: categoriesError } = useQuery({
     queryKey: ["categories"],
     queryFn: () => fetchGraphQL<CategoryListResponse>(QUERY_CATEGORIES),
+    retry: 3,
+    retryDelay: 1000,
   });
 
   // Query for products
@@ -45,6 +50,7 @@ const Index = () => {
     data: productsData,
     refetch: refetchProducts,
     isRefetching: productsRefetching,
+    error: productsError,
   } = useQuery({
     queryKey: ["products", selectedCategory, selectedStatus],
     queryFn: () => {
@@ -66,6 +72,8 @@ const Index = () => {
       return fetchGraphQL<ProductsResponse>(QUERY_DASHBOARD_PRODUCTS, variables);
     },
     refetchInterval: AUTO_REFRESH_INTERVAL,
+    retry: 3,
+    retryDelay: 1000,
   });
 
   const handleRefresh = () => {
@@ -106,6 +114,34 @@ const Index = () => {
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary mx-auto"></div>
           <p className="text-xl text-foreground">Cargando Dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (statsError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background p-8">
+        <div className="text-center space-y-4 max-w-2xl">
+          <AlertCircle className="h-16 w-16 text-destructive mx-auto" />
+          <h2 className="text-2xl font-bold text-foreground">Error de Conexión</h2>
+          <p className="text-muted-foreground">
+            No se puede conectar al servidor GraphQL en tiendaddvc.mx
+          </p>
+          <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 text-left">
+            <p className="font-mono text-sm text-destructive break-all">
+              {statsError instanceof Error ? statsError.message : "Error desconocido"}
+            </p>
+          </div>
+          <div className="text-sm text-muted-foreground space-y-2">
+            <p>Posibles causas:</p>
+            <ul className="list-disc list-inside text-left space-y-1">
+              <li>El servidor GraphQL no está respondiendo</li>
+              <li>Problemas de CORS en el servidor</li>
+              <li>La URL del endpoint es incorrecta</li>
+              <li>Problemas de conectividad de red</li>
+            </ul>
+          </div>
         </div>
       </div>
     );
