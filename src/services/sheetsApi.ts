@@ -8,6 +8,7 @@ export interface SheetProduct {
   precio_final: number;
   peso: number;
   categoria_nombre: string;
+  categoria_path: string; // e.g., "clinica/cementos/ionomero" o "base"
 }
 
 export interface SheetsResponse {

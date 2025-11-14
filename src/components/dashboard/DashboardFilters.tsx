@@ -1,11 +1,16 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Filter, RefreshCw, Search } from "lucide-react";
 
+interface CategoryStructure {
+  mainCategory: string;
+  subcategories: string[];
+}
+
 interface DashboardFiltersProps {
-  categories: { id: string; name: string }[];
+  categoryStructure: CategoryStructure[];
   selectedCategory: string;
   onCategoryChange: (value: string) => void;
   selectedStatus: string;
@@ -21,7 +26,7 @@ interface DashboardFiltersProps {
 }
 
 export function DashboardFilters({
-  categories,
+  categoryStructure,
   selectedCategory,
   onCategoryChange,
   selectedStatus,
@@ -35,6 +40,12 @@ export function DashboardFilters({
   onRefresh,
   isRefreshing,
 }: DashboardFiltersProps) {
+  // Format category path for display
+  const formatCategoryPath = (path: string) => {
+    const parts = path.split('/');
+    return parts[parts.length - 1].charAt(0).toUpperCase() + parts[parts.length - 1].slice(1);
+  };
+
   return (
     <div className="space-y-4 bg-card p-4 rounded-lg border border-border shadow-sm">
       <div className="flex items-center gap-2 mb-4">
@@ -59,19 +70,29 @@ export function DashboardFilters({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Category filter */}
+        {/* Category filter with hierarchy */}
         <div className="space-y-2">
           <Label className="text-foreground">Categoría</Label>
           <Select value={selectedCategory} onValueChange={onCategoryChange}>
             <SelectTrigger className="bg-background border-border">
               <SelectValue placeholder="Todas las categorías" />
             </SelectTrigger>
-            <SelectContent className="bg-popover border-border">
+            <SelectContent className="bg-popover border-border max-h-[400px]">
               <SelectItem value="all">Todas las categorías</SelectItem>
-              {categories.map((cat) => (
-                <SelectItem key={cat.id} value={cat.name}>
-                  {cat.name}
-                </SelectItem>
+              {categoryStructure.map((catStruct) => (
+                <SelectGroup key={catStruct.mainCategory}>
+                  <SelectLabel className="capitalize font-semibold text-primary">
+                    {catStruct.mainCategory}
+                  </SelectLabel>
+                  <SelectItem value={catStruct.mainCategory}>
+                    Todas en {catStruct.mainCategory}
+                  </SelectItem>
+                  {catStruct.subcategories.map((subPath) => (
+                    <SelectItem key={subPath} value={subPath} className="pl-6">
+                      {formatCategoryPath(subPath)}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               ))}
             </SelectContent>
           </Select>
