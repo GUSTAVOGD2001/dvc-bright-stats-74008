@@ -41,7 +41,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {products.slice(0, 20).map((product) => (
+              {products.slice(0, 50).map((product) => (
                 <TableRow key={product.sku} className="hover:bg-muted/30 transition-colors">
                   <TableCell className="font-mono text-xs text-muted-foreground">{product.sku}</TableCell>
                   <TableCell className="font-medium text-foreground max-w-xs truncate">{product.nombre}</TableCell>

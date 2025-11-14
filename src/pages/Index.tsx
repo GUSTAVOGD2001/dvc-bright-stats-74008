@@ -64,15 +64,8 @@ const Index = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Calculate KPIs from all products
+  // Prepare products for filtering
   const products = allProducts || [];
-  const totalProducts = products.length;
-  const totalInStock = products.filter((p) => p.existencia === "En Existencia").length;
-  const totalOutOfStock = products.filter((p) => p.existencia === "Agotado").length;
-
-  const catalogValue = products
-    .filter((p) => p.existencia === "En Existencia")
-    .reduce((sum, p) => sum + p.precio_final, 0);
 
   // Extract hierarchical categories from categoria_path
   interface CategoryHierarchy {
@@ -141,6 +134,16 @@ const Index = () => {
 
     return true;
   });
+
+  // Calculate KPIs from filtered products
+  const totalProducts = filteredProducts.length;
+  const totalInStock = filteredProducts.filter((p) => p.existencia === "En Existencia").length;
+  const totalOutOfStock = filteredProducts.filter((p) => p.existencia === "Agotado").length;
+
+  // Calculate average price from filtered products
+  const averagePrice = filteredProducts.length > 0
+    ? filteredProducts.reduce((sum, p) => sum + p.precio_final, 0) / filteredProducts.length
+    : 0;
 
   // Calculate filtered stats for the inventory chart
   const filteredInStock = filteredProducts.filter((p) => p.existencia === "En Existencia").length;
@@ -221,8 +224,8 @@ const Index = () => {
           <KPICard title="En Existencia" value={totalInStock.toLocaleString()} icon={ShoppingCart} variant="success" />
           <KPICard title="Agotados" value={totalOutOfStock.toLocaleString()} icon={AlertCircle} variant="danger" />
           <KPICard
-            title="Valor Potencial"
-            value={`$${(catalogValue / 1000).toFixed(0)}K`}
+            title="Precio Promedio"
+            value={`$${averagePrice.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             icon={TrendingUp}
             variant="warning"
           />
