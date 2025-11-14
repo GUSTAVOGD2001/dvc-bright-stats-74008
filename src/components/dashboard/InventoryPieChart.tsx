@@ -13,7 +13,7 @@ export function InventoryPieChart({ inStock, outOfStock }: InventoryPieChartProp
   ];
 
   return (
-    <Card className="bg-card/50 backdrop-blur-sm border-2 border-primary/20">
+    <Card className="bg-card border-2 border-border shadow-sm">
       <CardHeader>
         <CardTitle className="text-foreground flex items-center gap-2">
           <div className="w-1 h-6 bg-primary rounded-full" />
