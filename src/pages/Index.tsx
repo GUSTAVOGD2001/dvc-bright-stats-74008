@@ -9,6 +9,7 @@ import { PriceHistogram } from "@/components/dashboard/PriceHistogram";
 import { ProductsTable } from "@/components/dashboard/ProductsTable";
 import {
   fetchGraphQL,
+  fetchAllProducts,
   QUERY_GLOBAL_STATS,
   QUERY_CATEGORIES,
   QUERY_DASHBOARD_PRODUCTS,
@@ -22,22 +23,26 @@ const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [minPrice, setMinPrice] = useState<number>(0);
+  const [maxPrice, setMaxPrice] = useState<number>(100000);
 
-  // Query for global stats
+  // Query for global stats (fetch all products in one go using batch strategy)
   const {
-    data: statsData,
+    data: allProductsData,
     refetch: refetchStats,
     isLoading: statsLoading,
     error: statsError,
   } = useQuery({
-    queryKey: ["globalStats"],
-    queryFn: () => fetchGraphQL<ProductsResponse>(QUERY_GLOBAL_STATS, { pageSize: 1000, currentPage: 1 }),
+    queryKey: ["allProducts"],
+    queryFn: () => fetchAllProducts(),
     refetchInterval: AUTO_REFRESH_INTERVAL,
     retry: 3,
     retryDelay: 1000,
+    staleTime: 4 * 60 * 1000, // Consider data fresh for 4 minutes
   });
 
-  // Query for categories
+  // Query for categories (still needed for filters)
   const { data: categoriesData, error: categoriesError } = useQuery({
     queryKey: ["categories"],
     queryFn: () => fetchGraphQL<CategoryListResponse>(QUERY_CATEGORIES),
@@ -45,28 +50,8 @@ const Index = () => {
     retryDelay: 1000,
   });
 
-  // Query for products
-  const {
-    data: productsData,
-    refetch: refetchProducts,
-    isRefetching: productsRefetching,
-    error: productsError,
-  } = useQuery({
-    queryKey: ["products", selectedCategory, selectedStatus],
-    queryFn: () => {
-      return fetchGraphQL<ProductsResponse>(QUERY_DASHBOARD_PRODUCTS, {
-        pageSize: 1000,
-        currentPage: 1,
-      });
-    },
-    refetchInterval: AUTO_REFRESH_INTERVAL,
-    retry: 3,
-    retryDelay: 1000,
-  });
-
   const handleRefresh = () => {
     refetchStats();
-    refetchProducts();
     toast.success("Dashboard actualizado", {
       description: "Los datos se han actualizado correctamente.",
     });
@@ -83,8 +68,8 @@ const Index = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Calculate KPIs
-  const allProducts = statsData?.products.items || [];
+  // Calculate KPIs from all products
+  const allProducts = allProductsData?.products.items || [];
   const totalProducts = allProducts.length;
   const inStock = allProducts.filter((p) => p.is_salable).length;
   const outOfStock = allProducts.filter((p) => !p.is_salable).length;
@@ -94,16 +79,32 @@ const Index = () => {
     .reduce((sum, p) => sum + p.price_range.minimum_price.final_price.value, 0);
 
   const categories = categoriesData?.categoryList || [];
-  const products = productsData?.products.items || [];
   
   // Apply filters to products
-  const filteredProducts = products.filter((p) => {
+  const filteredProducts = allProducts.filter((p) => {
+    // Status filter
     if (selectedStatus === "available" && !p.is_salable) return false;
     if (selectedStatus === "out_of_stock" && p.is_salable) return false;
+    
+    // Category filter
     if (selectedCategory !== "all") {
       const hasCategory = p.categories.some((cat) => cat.name === selectedCategory);
       if (!hasCategory) return false;
     }
+    
+    // Search filter
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      if (!p.name.toLowerCase().includes(searchLower) && 
+          !p.sku.toLowerCase().includes(searchLower)) {
+        return false;
+      }
+    }
+    
+    // Price range filter
+    const finalPrice = p.price_range.minimum_price.final_price.value;
+    if (finalPrice < minPrice || finalPrice > maxPrice) return false;
+    
     return true;
   });
 
@@ -164,8 +165,14 @@ const Index = () => {
           onCategoryChange={setSelectedCategory}
           selectedStatus={selectedStatus}
           onStatusChange={setSelectedStatus}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          minPrice={minPrice}
+          maxPrice={maxPrice}
+          onMinPriceChange={setMinPrice}
+          onMaxPriceChange={setMaxPrice}
           onRefresh={handleRefresh}
-          isRefreshing={productsRefetching}
+          isRefreshing={statsLoading}
         />
 
         {/* KPIs */}
