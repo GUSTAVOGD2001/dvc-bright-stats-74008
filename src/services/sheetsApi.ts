@@ -21,6 +21,7 @@ export async function fetchAllProducts(): Promise<SheetProduct[]> {
     const response = await fetch(SHEETS_API_URL, {
       method: 'GET',
       headers: {
+        'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
     });
