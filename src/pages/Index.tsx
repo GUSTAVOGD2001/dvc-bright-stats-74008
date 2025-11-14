@@ -63,10 +63,36 @@ const Index = () => {
     .filter((p) => p.existencia === "En Existencia")
     .reduce((sum, p) => sum + p.precio_final, 0);
 
-  // Extract unique categories (filter out empty category names)
-  const categories = Array.from(
-    new Set(products.map((p) => p.categoria_nombre).filter(name => name && name.trim() !== ''))
-  ).map((name, index) => ({ id: String(index), name }));
+  // Extract hierarchical categories from categoria_path
+  interface CategoryHierarchy {
+    [mainCategory: string]: Set<string>;
+  }
+  
+  const categoryHierarchy: CategoryHierarchy = {};
+  products.forEach((p) => {
+    if (!p.categoria_path) return;
+    
+    const pathParts = p.categoria_path.split('/');
+    const mainCategory = pathParts[0];
+    
+    if (!categoryHierarchy[mainCategory]) {
+      categoryHierarchy[mainCategory] = new Set();
+    }
+    
+    // If there are subcategories, add the full path
+    if (pathParts.length > 1) {
+      categoryHierarchy[mainCategory].add(p.categoria_path);
+    }
+  });
+
+  // Convert to sorted arrays for display
+  const categoryStructure = Object.keys(categoryHierarchy)
+    .filter(key => key && key.trim() !== '')
+    .sort()
+    .map(mainCat => ({
+      mainCategory: mainCat,
+      subcategories: Array.from(categoryHierarchy[mainCat]).sort()
+    }));
 
   // Apply filters to products
   const filteredProducts = products.filter((p) => {
@@ -74,8 +100,20 @@ const Index = () => {
     if (selectedStatus === "available" && p.existencia !== "En Existencia") return false;
     if (selectedStatus === "out_of_stock" && p.existencia !== "Agotado") return false;
 
-    // Category filter
-    if (selectedCategory !== "all" && p.categoria_nombre !== selectedCategory) return false;
+    // Category filter - now supports full path or main category
+    if (selectedCategory !== "all") {
+      const pathParts = p.categoria_path?.split('/') || [];
+      const mainCategory = pathParts[0];
+      
+      // Check if selected is a main category or full path
+      if (selectedCategory.includes('/')) {
+        // Full path selected
+        if (p.categoria_path !== selectedCategory) return false;
+      } else {
+        // Main category selected - match any product that starts with this category
+        if (mainCategory !== selectedCategory) return false;
+      }
+    }
 
     // Search filter
     if (searchTerm) {
@@ -150,7 +188,7 @@ const Index = () => {
 
         {/* Filters */}
         <DashboardFilters
-          categories={categories}
+          categoryStructure={categoryStructure}
           selectedCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}
           selectedStatus={selectedStatus}
