@@ -43,7 +43,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
                   <TableCell className="font-mono text-xs text-muted-foreground">{product.sku}</TableCell>
                   <TableCell className="font-medium text-foreground max-w-xs truncate">{product.nombre}</TableCell>
                   <TableCell>
-                    {product.existencia ? (
+                    {product.existencia === "En Existencia" ? (
                       <Badge variant="outline" className="bg-success/10 text-success border-success/30">
                         En Existencia
                       </Badge>
