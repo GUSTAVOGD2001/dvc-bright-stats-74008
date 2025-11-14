@@ -49,6 +49,25 @@ export async function fetchGraphQL<T>(query: string, variables: Record<string, a
   }
 }
 
+// New function to fetch all products using batch strategy
+export async function fetchAllProducts(): Promise<ProductsResponse> {
+  try {
+    const { data, error } = await supabase.functions.invoke('graphql-proxy', {
+      body: { action: 'fetchAll' }
+    });
+
+    if (error) {
+      console.error("GraphQL Proxy Error:", error);
+      throw new Error(error.message || "Error calling GraphQL proxy");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("GraphQL Fetch Error:", error);
+    throw error;
+  }
+}
+
 export const QUERY_GLOBAL_STATS = `
   query DashboardGlobalStats($pageSize: Int!, $currentPage: Int!) {
     products(filter: {}, pageSize: $pageSize, currentPage: $currentPage) {
