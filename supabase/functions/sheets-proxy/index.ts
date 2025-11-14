@@ -46,6 +46,40 @@ serve(async (req) => {
     }
 
     console.log('📊 Google Sheets response status:', response.status);
+    
+    // Check if response is successful before parsing
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Google Sheets API error:', response.status, errorText.substring(0, 200));
+      
+      // Handle rate limiting specifically
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'Rate limit exceeded',
+            message: 'La API de Google Sheets ha alcanzado su límite de solicitudes. Por favor, espera unos minutos antes de intentar nuevamente.'
+          }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 429,
+          }
+        );
+      }
+      
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: `Google Sheets API returned ${response.status}`,
+          message: 'Error al obtener datos de Google Sheets'
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: response.status,
+        }
+      );
+    }
+    
     const data = await response.json();
     console.log('📦 Full response data:', JSON.stringify(data).substring(0, 200));
     
