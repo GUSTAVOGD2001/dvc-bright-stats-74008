@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface SheetProduct {
   sku: string;
   nombre: string;
-  existencia: boolean;
+  existencia: string; // "En Existencia" o "Agotado"
   precio_regular: number;
   precio_final: number;
   peso: number;
