@@ -1,7 +1,9 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { SheetProduct } from "@/services/sheetsApi";
+import { ExternalLink, ImageIcon } from "lucide-react";
 
 interface ProductsTableProps {
   products: SheetProduct[];
@@ -35,6 +37,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
                 <TableHead className="text-foreground font-semibold text-right">Precio Final</TableHead>
                 <TableHead className="text-foreground font-semibold text-right">Peso (kg)</TableHead>
                 <TableHead className="text-foreground font-semibold">Categorías</TableHead>
+                <TableHead className="text-foreground font-semibold">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -64,6 +67,32 @@ export function ProductsTable({ products }: ProductsTableProps) {
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground max-w-xs truncate">
                     {product.categoria_nombre}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      {product.url && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.open(product.url, '_blank')}
+                          className="text-xs"
+                        >
+                          <ExternalLink className="h-3 w-3 mr-1" />
+                          Ver en tienda
+                        </Button>
+                      )}
+                      {product.url_imagen && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.open(product.url_imagen, '_blank')}
+                          className="text-xs"
+                        >
+                          <ImageIcon className="h-3 w-3 mr-1" />
+                          Ver imagen
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

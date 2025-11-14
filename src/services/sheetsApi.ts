@@ -9,6 +9,8 @@ export interface SheetProduct {
   peso: number;
   categoria_nombre: string;
   categoria_path: string; // e.g., "clinica/cementos/ionomero" o "base"
+  url?: string;
+  url_imagen?: string;
 }
 
 export interface SheetsResponse {
