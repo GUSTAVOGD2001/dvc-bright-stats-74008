@@ -56,11 +56,11 @@ const Index = () => {
   // Calculate KPIs from all products
   const products = allProducts || [];
   const totalProducts = products.length;
-  const inStock = products.filter((p) => p.existencia).length;
-  const outOfStock = products.filter((p) => !p.existencia).length;
+  const inStock = products.filter((p) => p.existencia === "En Existencia").length;
+  const outOfStock = products.filter((p) => p.existencia === "Agotado").length;
 
   const catalogValue = products
-    .filter((p) => p.existencia)
+    .filter((p) => p.existencia === "En Existencia")
     .reduce((sum, p) => sum + p.precio_final, 0);
 
   // Extract unique categories (filter out empty category names)
@@ -71,8 +71,8 @@ const Index = () => {
   // Apply filters to products
   const filteredProducts = products.filter((p) => {
     // Status filter
-    if (selectedStatus === "available" && !p.existencia) return false;
-    if (selectedStatus === "out_of_stock" && p.existencia) return false;
+    if (selectedStatus === "available" && p.existencia !== "En Existencia") return false;
+    if (selectedStatus === "out_of_stock" && p.existencia !== "Agotado") return false;
 
     // Category filter
     if (selectedCategory !== "all" && p.categoria_nombre !== selectedCategory) return false;
